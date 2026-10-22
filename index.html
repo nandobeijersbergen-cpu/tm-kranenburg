@@ -251,9 +251,36 @@ header{background:rgba(20,35,80,.28);-webkit-backdrop-filter:var(--blur);backdro
   header,.card,.member,.finder-result,.rating,.contact-box,.shop-form,.box-ph,.quickbar a{background:rgba(20,32,63,.82)}
 }
 .loc{display:inline-block;margin-top:.6rem;background:rgba(242,215,78,.92);color:var(--ink);font-weight:900;font-size:1.05rem;padding:.25rem .8rem;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+
+/* ---------- Altersabfrage 18+ ---------- */
+.agegate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(10,18,40,.72);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
+.agegate[hidden]{display:none}
+.agegate-box{width:100%;max-width:24rem;text-align:center;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);border-radius:24px;padding:1.6rem 1.4rem 1.4rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 20px 50px rgba(0,0,0,.45)}
+.agegate-badge{display:inline-flex;align-items:center;justify-content:center;width:4.2rem;height:4.2rem;border-radius:50%;background:var(--yellow);color:var(--ink);font-weight:900;font-size:1.5rem;margin-bottom:.9rem}
+.agegate h2{margin:0 0 .5rem;font-weight:900;font-size:1.35rem;line-height:1.2;text-transform:none}
+.agegate p{margin:0 0 1.2rem;font-weight:500;font-size:.95rem;line-height:1.45;color:rgba(255,255,255,.85)}
+.agegate .btn{display:block;width:100%;margin:0 0 .6rem}
+.agegate .no{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);box-shadow:none}
+.agegate-lang{margin-top:.6rem}
+.agegate-msg{display:none;margin-top:.4rem;font-weight:700;color:var(--yellow)}
+.agegate.denied .agegate-msg{display:block}
+.agegate.denied .yes,.agegate.denied .no{display:none}
+body.gated{overflow:hidden}
 </style>
 </head>
 <body>
+
+<div class="agegate" id="agegate" role="dialog" aria-modal="true" aria-labelledby="agegateTitle">
+  <div class="agegate-box">
+    <div class="agegate-badge">18+</div>
+    <h2 id="agegateTitle" data-i18n="ageTitle">Bist du mindestens 18 Jahre alt?</h2>
+    <p data-i18n="ageText">Diese Seite enthält Informationen zu Tabakwaren und richtet sich nur an Erwachsene.</p>
+    <button type="button" class="btn yes" id="ageYes" data-i18n="ageYes">Ja, ich bin 18 oder älter</button>
+    <button type="button" class="btn no" id="ageNo" data-i18n="ageNo">Nein, ich bin unter 18</button>
+    <div class="agegate-msg" data-i18n="ageDenied">Leider darfst du diese Seite erst ab 18 Jahren nutzen.</div>
+    <div class="lang agegate-lang"><button data-lang="de">DE</button><button data-lang="nl">NL</button></div>
+  </div>
+</div>
 
 <header>
   <a class="brand" href="#hero">Tobacco <span>&amp;</span> More</a>
@@ -360,6 +387,7 @@ const T = {
     errSend:"Das Absenden hat nicht geklappt. Bitte nutze das Google-Formular:",
     fbMsg:"Fast fertig! Deine Bestellung ist kopiert. Öffne das Google-Formular, trag Name, Handynummer und Datum ein und füge die Bestellung ins Feld „Bestellung“ ein:",
     fbOpen:"Google-Formular öffnen",
+    ageTitle:"Bist du mindestens 18 Jahre alt?", ageText:"Diese Seite enthält Informationen zu Tabakwaren und richtet sich nur an Erwachsene.", ageYes:"Ja, ich bin 18 oder älter", ageNo:"Nein, ich bin unter 18", ageDenied:"Leider darfst du diese Seite erst ab 18 Jahren nutzen.",
     kranNote:"<strong>Abholung bei Tobacco &amp; More Kranenburg</strong> Großen Haag 4, 47559 Kranenburg · Mo–Fr 08:00–20:00 · Sa 08:00–19:00",
     step1:"1. QR-Code scannen oder den Link öffnen", step2:"2. Bestellung eintragen (Stangen und Packungen getrennt) und Abholtag wählen", step3:"3. Bestellung am gewählten Tag in der Filiale abholen",
     orderBtn:"Zum Bestellformular", orderNote:"[Bestell-Link folgt]",
@@ -392,6 +420,7 @@ const T = {
     errSend:"Versturen is niet gelukt. Gebruik het Google-formulier:",
     fbMsg:"Bijna klaar! Je bestelling is gekopieerd. Open het Google-formulier, vul naam, mobiel nummer en datum in en plak de bestelling in het veld „Bestellung“:",
     fbOpen:"Google-formulier openen",
+    ageTitle:"Ben je minimaal 18 jaar oud?", ageText:"Deze website bevat informatie over tabaksproducten en is alleen bedoeld voor volwassenen.", ageYes:"Ja, ik ben 18 of ouder", ageNo:"Nee, ik ben jonger dan 18", ageDenied:"Je mag deze website pas vanaf 18 jaar gebruiken.",
     kranNote:"<strong>Afhalen bij Tobacco &amp; More Kranenburg</strong> Großen Haag 4, 47559 Kranenburg · ma–vr 08:00–20:00 · za 08:00–19:00",
     step1:"1. Scan de QR-code of open de link", step2:"2. Vul je bestelling in (stangen en pakjes apart) en kies de ophaaldatum", step3:"3. Haal je bestelling op de gekozen dag af in de winkel",
     orderBtn:"Naar het bestelformulier", orderNote:"[Bestel-link volgt]",
@@ -576,6 +605,22 @@ shopForm.addEventListener("submit", async e => {
 addLine();
 
 applyLang();
+
+// ---------- Altersabfrage 18+ ----------
+(function(){
+  const gate = document.getElementById("agegate");
+  let ok = false;
+  try { ok = localStorage.getItem("age18") === "yes"; } catch (e) {}
+  if (ok) { gate.hidden = true; return; }
+  document.body.classList.add("gated");
+  document.getElementById("ageYes").addEventListener("click", () => {
+    try { localStorage.setItem("age18", "yes"); } catch (e) {}
+    gate.hidden = true; document.body.classList.remove("gated");
+  });
+  document.getElementById("ageNo").addEventListener("click", () => gate.classList.add("denied"));
+  gate.querySelectorAll(".lang button").forEach(b =>
+    b.addEventListener("click", () => { lang = b.dataset.lang; try { localStorage.setItem("lang", lang); } catch (e) {} applyLang(); }));
+})();
 
 // ---------- Effekte: Parallax, Zoom beim Scrollen, Einblenden ----------
 (function(){
