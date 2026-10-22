@@ -610,11 +610,11 @@ applyLang();
 (function(){
   const gate = document.getElementById("agegate");
   let ok = false;
-  try { ok = localStorage.getItem("age18") === "yes"; } catch (e) {}
+  try { ok = sessionStorage.getItem("age18") === "yes"; } catch (e) {}
   if (ok) { gate.hidden = true; return; }
   document.body.classList.add("gated");
   document.getElementById("ageYes").addEventListener("click", () => {
-    try { localStorage.setItem("age18", "yes"); } catch (e) {}
+    try { sessionStorage.setItem("age18", "yes"); } catch (e) {}
     gate.hidden = true; document.body.classList.remove("gated");
   });
   document.getElementById("ageNo").addEventListener("click", () => gate.classList.add("denied"));
